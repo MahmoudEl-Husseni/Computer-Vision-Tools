@@ -74,6 +74,29 @@ def plot_chist(im):
     res = np.hstack([im, im_])
     results.append(res)
   return results
+  
+# To Tune Hyperparameters
+def plot_params(im, transform, params):
+
+  """
+  Plots the results of applying a transform to an image for different parameters.
+
+  Args:
+    im: The image to be adjusted.
+    transform: A function that takes an image and a dictionary of parameters as input and returns the transformed image.
+    params: A list of dictionaries, each of which specifies the parameters for the transform.
+
+  Returns:
+      None.
+  """
+
+  im_ = im.copy()
+  images_ = []
+  titles = []
+  for v in params:
+    images_.append(transform(im, debug=True, **v))
+    titles.append(str(v))
+  plot_images(images_, titles)
 # ===================================================================================================================== #
 # --------------------------------------- Image Processing and Transformations ---------------------------------------- #
 # ===================================================================================================================== #
@@ -88,12 +111,14 @@ def apply_transform(images, transform):
     images_[i] = transform(images[i]) 
   return images_
 # ========================================================
-def adjust_contrast(im, debug=False):
+def adjust_contrast(im, clipLimit=2.0, tileGridSize=(8, 8), debug=False):
   """
   Adjusts the contrast of an image using CLAHE.
 
   Args:
     im: The image to be adjusted.
+    clipLimit: The clip limit for CLAHE. This is a value that controls how much the contrast is enhanced.
+    tileGridSize: The tile grid size for CLAHE. This is the size of the local regions that are used to equalize the histogram.
     debug: Whether to return a debug image showing the original and adjusted images.
 
   Returns:
@@ -104,8 +129,7 @@ def adjust_contrast(im, debug=False):
   l_channel, a, b = cv.split(lab)
 
   # Applying CLAHE to L-channel
-  # feel free to try different values for the limit and grid size:
-  clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+  clahe = cv.createCLAHE(clipLimit=clipLimit, tileGridSize=tileGridSize)
   cl = clahe.apply(l_channel)
 
   # merge the CLAHE enhanced L-channel with the a and b channel
@@ -199,6 +223,7 @@ def gaussian_blur(im, kernel_size=5, debug=False):
     The blurred image.
   """
   im_ = im.copy()
+  im_ = np.float32(im_)
   im_ = cv.GaussianBlur(im_, (kernel_size, kernel_size), 0)
   if debug:
     im_ = np.hstack([im, im_])

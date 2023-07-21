@@ -74,3 +74,27 @@ def plot_chist(im):
     res = np.hstack([im, im_])
     results.append(res)
   return results
+  
+# To Tune Hyperparameters
+def plot_params(im, transform, params):
+
+  """
+  Plots the results of applying a transform to an image for different parameters.
+
+  Args:
+    im: The image to be adjusted.
+    transform: A function that takes an image and a dictionary of parameters as input and returns the transformed image.
+    params: A list of dictionaries, each of which specifies the parameters for the transform.
+
+  Returns:
+      None.
+  """
+
+  im_ = im.copy()
+  images_ = []
+  titles = []
+  for v in params:
+    images_.append(transform(im, debug=True, **v))
+    titles.append(str(v))
+  plot_images(images_, titles)
+
