@@ -74,7 +74,46 @@ def plot_chist(im):
     res = np.hstack([im, im_])
     results.append(res)
   return results
-  
+# ============================================================
+# Plot line using plotly
+def plot_line(y_data=None, x_data=None, name=""):
+  """
+  Plots a line graph.
+
+  Args:
+    y_data: The y-axis data.
+    x_data: The x-axis data. If None, it will be automatically generated.
+    name: The name of the line.
+
+  Returns:
+    A plotly figure object.
+  """
+
+  if x_data is None:
+    x_data = list(range(len(y_data)))
+
+  assert y_data is not None, f"y_data should have iterative data structure: {str(type(y_data))} is not allowed"
+
+  fig = go.Figure(
+      layout=go.Layout(
+          plot_bgcolor="rgba(0, 0, 0, 1)", paper_bgcolor="rgba(70, 10, 10, 1)",
+      )
+  )
+
+  fig.add_trace(go.Scatter(x=x_data, y=y_data, name=name, marker=dict(color="white")))
+
+  for i in range(len(x_data)):
+    fig.add_annotation(
+        x=x_data[i], y=y_data[i], text="o", showarrow=False, font=dict(color="white", size=20)
+    )
+
+  fig.update_layout(
+      xaxis=dict(color="white"),
+      yaxis=dict(color="white"),
+  )
+
+  return fig
+# ============================================================
 # To Tune Hyperparameters
 def plot_params(im, transform, params):
 
@@ -251,4 +290,59 @@ def sharpen_image(im, center_weight=5, edges_weight=-1, debug=False):
     im_ = np.hstack([im, im_])
 
   return im_
+# ===================================================================================================================== #
+# --------------------------------------------------- Various Utils --------------------------------------------------- #
+# ===================================================================================================================== #
+def create_video(src_dir, out_path):
+  """
+  Creates a video from a directory of images.
+
+  Args:
+    src_dir: The directory containing the images.
+    out_path: The path to the output video file.
+
+  Returns:
+    None.
+  """
+
+  img_array = []
+  file_names = sorted(glob.glob(src_dir + '/*.jpg'))
+  for filename in file_names:
+    img = cv.imread(filename)
+    height, width, layers = img.shape
+    size = (width, height)
+    img_array.append(img)
+
+  out = cv.VideoWriter(out_path, cv.VideoWriter_fourcc(*'DIVX'), 15, size)
+
+  for i in range(len(img_array)):
+    out.write(img_array[i])
+  out.release()
+# ============================================================
+def display_video(vid_path):
+  """
+  Displays a video in an Ipynb file.
+
+  Args:
+    vid_path: The path to the video file.
+
+  Returns:
+    None.
+
+  **Optimizations:**
+    - Use `display.HTML` to display the video in Ipynb files.
+  """
+
+  out_path = vid_path.split('.')[0] + '.mp4'
+  # convert video extenstion from .avi to .mp4
+  os.system(f"ffmpeg -i {vid_path} -y {out_path}")
+
+  mp4 = open(out_path, 'rb').read()
+  data_url = "data:video/mp4;base64," + base64.b64encode(mp4).decode()
+
+  display(HTML("""
+  <video controls width="1080" height="576">
+        <source src="%s" type="video/mp4">
+  </video>
+  """ % data_url))
 # ============================================================

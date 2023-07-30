@@ -74,7 +74,7 @@ def plot_chist(im):
     res = np.hstack([im, im_])
     results.append(res)
   return results
-  
+# ============================================================
 # To Tune Hyperparameters
 def plot_params(im, transform, params):
 
@@ -97,4 +97,42 @@ def plot_params(im, transform, params):
     images_.append(transform(im, debug=True, **v))
     titles.append(str(v))
   plot_images(images_, titles)
+# ============================================================
+# Plot line using plotly
+def plot_line(y_data=None, x_data=None, name=""):
+  """
+  Plots a line graph.
 
+  Args:
+    y_data: The y-axis data.
+    x_data: The x-axis data. If None, it will be automatically generated.
+    name: The name of the line.
+
+  Returns:
+    A plotly figure object.
+  """
+
+  if x_data is None:
+    x_data = list(range(len(y_data)))
+
+  assert y_data is not None, f"y_data should have iterative data structure: {str(type(y_data))} is not allowed"
+
+  fig = go.Figure(
+      layout=go.Layout(
+          plot_bgcolor="rgba(0, 0, 0, 1)", paper_bgcolor="rgba(70, 10, 10, 1)",
+      )
+  )
+
+  fig.add_trace(go.Scatter(x=x_data, y=y_data, name=name, marker=dict(color="white")))
+
+  for i in range(len(x_data)):
+    fig.add_annotation(
+        x=x_data[i], y=y_data[i], text="o", showarrow=False, font=dict(color="white", size=20)
+    )
+
+  fig.update_layout(
+      xaxis=dict(color="white"),
+      yaxis=dict(color="white"),
+  )
+
+  return fig
